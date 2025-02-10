@@ -65,3 +65,48 @@ const Column = {
     },
 };
 
+const TaskCard = {
+    template: `
+    <div class="task-card">
+      <h3>{{ task.title }}</h3>
+      <p>{{ task.description }}</p>
+      <p>Создано: {{ task.createdAt }}</p>
+      <p>Последнее редактирование: {{ task.lastEdited }}</p>
+      <p>Дэдлайн: {{ task.deadline }}</p>
+      <button @click="editTask">Редактировать</button>
+      <button @click="deleteTask">Удалить</button>
+      <select v-if="column !== 'completedTasks'" @change="moveTask($event.target.value)">
+        <option value="">Переместить в...</option>
+        <option value="inProgressTasks">В работу</option>
+        <option value="testingTasks">Тестирование</option>
+        <option value="completedTasks">Выполнено</option>
+      </select>
+    </div>
+  `,
+    props: {
+        task: Object,
+        column: String,
+    },
+    methods: {
+        editTask() {
+            this.$emit('edit-task', this.task);
+        },
+        deleteTask() {
+            this.$emit('delete-task', this.task);
+        },
+        moveTask(toColumn) {
+            if (toColumn) {
+                this.$emit('move-task', this.task, toColumn);
+            }
+        },
+    },
+};
+
+new Vue({
+    el: '#app',
+    components: {
+        KanbanBoard,
+        Column,
+        TaskCard,
+    },
+});
