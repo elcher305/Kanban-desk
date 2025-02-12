@@ -1,112 +1,132 @@
-const KanbanBoard = {
+Vue.component('kanban-board', {
     template: `
-    <div class="kanban-board">
-      <column title="Запланированные задачи" :tasks="plannedTasks" @add-task="addTask" @move-task="moveTask"></column>
-      <column title="Задачи в работе" :tasks="inProgressTasks" @move-task="moveTask"></column>
-      <column title="Тестирование" :tasks="testingTasks" @move-task="moveTask"></column>
-      <column title="Выполненные задачи" :tasks="completedTasks" @move-task="moveTask"></column>
-    </div>
-  `,
+        <div class="kanban-board">
+            <column title="Запланированные задачи" :cards="planned" @move-card="moveCard" @edit-card="editCard" @delete-card="deleteCard" :can-create="true"></column>
+            <column title="Задачи в работе" :cards="inProgress" @move-card="moveCard" @edit-card="editCard"></column>
+            <column title="Тестирование" :cards="testing" @move-card="moveCard" @edit-card="editCard"></column>
+            <column title="Выполненные задачи" :cards="completed" @move-card="moveCard"></column>
+        </div>
+    `,
     data() {
         return {
-            plannedTasks: [],
-            inProgressTasks: [],
-            testingTasks: [],
-            completedTasks: [],
+            planned: [],
+            inProgress: [],
+            testing: [],
+            completed: []
         };
     },
     methods: {
-        addTask(task) {
-            this.plannedTasks.push(task);
+        moveCard(card, from, to) {
+            this[from] = this[from].filter(c => c.id !== card.id);
+            this[to].push(card);
         },
-        moveTask(task, fromColumn, toColumn) {
-            this[fromColumn] = this[fromColumn].filter(t => t.id !== task.id);
-            this[toColumn].push(task);
+        editCard(card, column) {
+            const index = this[column].findIndex(c => c.id === card.id);
+            if (index !== -1) {
+                this[column][index] = card;
+            }
         },
-    },
-};
+        deleteCard(cardId) {
+            this.planned = this.planned.filter(c => c.id !== cardId);
+        }
+    }
+});
 
-const Column = {
+Vue.component('column', {
+    props: ['title', 'cards', 'canCreate'],
     template: `
-    <div class="column">
-      <h2>{{ title }}</h2>
-      <div v-for="task in tasks" :key="task.id">
-        <task-card :task="task" @edit-task="editTask" @delete-task="deleteTask" @move-task="moveTask"></task-card>
-      </div>
-      <button v-if="title === 'Запланированные задачи'" @click="addTask">Добавить задачу</button>
-    </div>
-  `,
-    props: {
-        title: String,
-        tasks: Array,
-    },
+        <div class="column">
+            <h2>{{ title }}</h2>
+            <div v-for="card in cards" :key="card.id">
+                <card :card="card" @move-card="moveCard" @edit-card="editCard" @delete-card="deleteCard"></card>
+            </div>
+            <button v-if="canCreate" @click="createCard">Создать карточку</button>
+        </div>
+    `,
     methods: {
-        addTask() {
-            const newTask = {
+        createCard() {
+            const newCard = {
                 id: Date.now(),
                 title: 'Новая задача',
                 description: 'Описание задачи',
                 deadline: '2023-12-31',
-                createdAt: new Date().toISOString(),
-                lastEdited: new Date().toISOString(),
+                createdAt: new Date().toLocaleString(),
+                lastEdited: new Date().toLocaleString()
             };
-            this.$emit('add-task', newTask);
+            this.$emit('move-card', newCard, '', 'planned');
         },
-        editTask(task) {
-            task.lastEdited = new Date().toISOString();
-            this.$emit('move-task', task, this.title.toLowerCase().replace(/ /g, ''), this.title.toLowerCase().replace(/ /g, ''));
+        moveCard(card, to) {
+            this.$emit('move-card', card, this.title.toLowerCase().replace(/ /g, ''), to);
         },
-        deleteTask(task) {
-            this.$emit('move-task', task, this.title.toLowerCase().replace(/ /g, ''), 'deleted');
+        editCard(card) {
+            this.$emit('edit-card', card, this.title.toLowerCase().replace(/ /g, ''));
         },
-        moveTask(task, toColumn) {
-            this.$emit('move-task', task, this.title.toLowerCase().replace(/ /g, ''), toColumn);
-        },
-    },
-};
+        deleteCard(cardId) {
+            this.$emit('delete-card', cardId);
+        }
+    }
+});
 
-const TaskCard = {
+Vue.component('card', {
+    props: ['card'],
     template: `
-    <div class="task-card">
-      <h3>{{ task.title }}</h3>
-      <p>{{ task.description }}</p>
-      <p>Создано: {{ task.createdAt }}</p>
-      <p>Последнее редактирование: {{ task.lastEdited }}</p>
-      <p>Дэдлайн: {{ task.deadline }}</p>
-      <button @click="editTask">Редактировать</button>
-      <button @click="deleteTask">Удалить</button>
-      <select v-if="column !== 'completedTasks'" @change="moveTask($event.target.value)">
-        <option value="">Переместить в...</option>
-        <option value="inProgressTasks">В работу</option>
-        <option value="testingTasks">Тестирование</option>
-        <option value="completedTasks">Выполнено</option>
-      </select>
-    </div>
-  `,
-    props: {
-        task: Object,
-        column: String,
+        <div class="card" :class="{ overdue: isOverdue, completed: isCompleted }">
+            <h3>{{ card.title }}</h3>
+            <p>{{ card.description }}</p>
+            <div class="deadline">Дэдлайн: {{ card.deadline }}</div>
+            <div class="timestamp">Создано: {{ card.createdAt }}</div>
+            <div class="timestamp">Последнее редактирование: {{ card.lastEdited }}</div>
+            <button @click="editCard">Редактировать</button>
+            <button @click="deleteCard">Удалить</button>
+            <button v-if="!isCompleted" @click="moveCard('inProgress')">В работу</button>
+            <button v-if="isInProgress" @click="moveCard('testing')">В тестирование</button>
+            <button v-if="isTesting" @click="moveCard('completed')">Завершить</button>
+            <button v-if="isTesting" @click="moveCard('inProgress', 'Возврат: требуется доработка')">Вернуть в работу</button>
+        </div>
+    `,
+    computed: {
+        isOverdue() {
+            return new Date(this.card.deadline) < new Date() && this.card.status === 'completed';
+        },
+        isCompleted() {
+            return this.card.status === 'completed';
+        },
+        isInProgress() {
+            return this.card.status === 'inProgress';
+        },
+        isTesting() {
+            return this.card.status === 'testing';
+        }
     },
     methods: {
-        editTask() {
-            this.$emit('edit-task', this.task);
-        },
-        deleteTask() {
-            this.$emit('delete-task', this.task);
-        },
-        moveTask(toColumn) {
-            if (toColumn) {
-                this.$emit('move-task', this.task, toColumn);
+        editCard() {
+            const newTitle = prompt('Введите новый заголовок', this.card.title);
+            const newDescription = prompt('Введите новое описание', this.card.description);
+            const newDeadline = prompt('Введите новый дэдлайн', this.card.deadline);
+            if (newTitle && newDescription && newDeadline) {
+                this.card.title = newTitle;
+                this.card.description = newDescription;
+                this.card.deadline = newDeadline;
+                this.card.lastEdited = new Date().toLocaleString();
+                this.$emit('edit-card', this.card);
             }
         },
-    },
-};
+        deleteCard() {
+            this.$emit('delete-card', this.card.id);
+        },
+        moveCard(to, reason) {
+            if (reason) {
+                this.card.returnReason = reason;
+            }
+            this.$emit('move-card', this.card, to);
+        }
+    }
+});
 
 new Vue({
     el: '#app',
-    components: {
-        KanbanBoard,
-        Column,
-        TaskCard,
-    },
+    data() {
+        
+    }
+
 });
