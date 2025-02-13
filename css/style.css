@@ -6,21 +6,21 @@
 
 body{
     background-color: rgb(255, 255, 255);
+
 }
 
 .column {
-    margin-top: 10px;
-    width: 350px;
-    background-color: rgba(90, 253, 119, 0.5);
-    border-radius: 7px;
-
+    background-color: rgb(232, 207, 207);
+    margin-top: 20px;
+    padding: 25px;
+    width: 250px;
+    border-radius: 10px;
 }
 
 .card {
-    width: 250px;
-    height: 210px;
     background-color: white;
-    padding: 15px;
+    border-radius: 15px;
+    padding: 10px;
     margin-top: 10px;
 }
 
@@ -120,15 +120,19 @@ p{
     font-family: sans-serif;
 }
 
+
+p{
+    font-family: sans-serif;
+}
+
 form {
     display: flex;
     flex-direction: column;
 }
 
 .form {
-    height: 15px;
+    height: 30px;
     width: 230px;
-    border: none;
     border-radius: 5px;
     margin-top: 15px;
     padding: 10px;
@@ -136,19 +140,17 @@ form {
 }
 
 .data {
-    height: 15px;
-    border: none;
-    font-size: 14px;
-    color: gray;
+    height: 10px;
+    border: 1px solid gray;
     border-radius: 5px;
-    margin-top: 20px;
+    margin-top: 15px;
     padding: 10px;
 
 }
 
 .board {
     display: flex;
-    gap: 30px;
+    gap: 20px;
 }
 
 .overdue {
@@ -160,7 +162,6 @@ form {
 }
 
 .add-card-form {
-    width: 300px;
     margin-top: 20px;
     padding: 20px;
     background-color: rgba(253,190,207, .5);
