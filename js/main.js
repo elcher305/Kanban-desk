@@ -1,132 +1,168 @@
-Vue.component('kanban-board', {
-    template: `
-        <div class="kanban-board">
-            <column title="Запланированные задачи" :cards="planned" @move-card="moveCard" @edit-card="editCard" @delete-card="deleteCard" :can-create="true"></column>
-            <column title="Задачи в работе" :cards="inProgress" @move-card="moveCard" @edit-card="editCard"></column>
-            <column title="Тестирование" :cards="testing" @move-card="moveCard" @edit-card="editCard"></column>
-            <column title="Выполненные задачи" :cards="completed" @move-card="moveCard"></column>
-        </div>
-    `,
-    data() {
-        return {
-            planned: [],
-            inProgress: [],
-            testing: [],
-            completed: []
-        };
-    },
-    methods: {
-        moveCard(card, from, to) {
-            this[from] = this[from].filter(c => c.id !== card.id);
-            this[to].push(card);
-        },
-        editCard(card, column) {
-            const index = this[column].findIndex(c => c.id === card.id);
-            if (index !== -1) {
-                this[column][index] = card;
-            }
-        },
-        deleteCard(cardId) {
-            this.planned = this.planned.filter(c => c.id !== cardId);
-        }
-    }
-});
+document.addEventListener('DOMContentLoaded', function () {
 
-Vue.component('column', {
-    props: ['title', 'cards', 'canCreate'],
-    template: `
-        <div class="column">
-            <h2>{{ title }}</h2>
-            <div v-for="card in cards" :key="card.id">
-                <card :card="card" @move-card="moveCard" @edit-card="editCard" @delete-card="deleteCard"></card>
+    Vue.component('card', {
+        props: ['card', 'columnIndex'],
+        template: `
+            <div class="card">
+                <h3>{{ card.title }}</h3>
+                <p>{{ card.description }}</p>
+                <p>Создано: {{ card.createdAt }}</p>
+                <p v-if="card.changes.length > 0">
+                    Изменения:
+                    <ul>
+                        <li v-for="(change, index) in card.changes" :key="index">
+                            {{ change.type }}: {{ change.timestamp }}
+                        </li>
+                    </ul>
+                </p>
+                <p>Дедлайн: {{ card.deadline }}</p>
+                <p v-if="card.isOverdue" class="overdue">Просрочено</p>
+                <p v-if="card.isCompleted" class="completed">Выполнено в срок</p>
+                <div>
+                    <button v-if="columnIndex !== 3" class="but" @click="$emit('edit-card')">Редактировать</button>
+                    <button class="but" @click="$emit('delete-card')">Удалить</button>
+                    <button class="but" v-if="columnIndex === 0" @click="move(1)">В работу</button>
+                    <button class="but" v-if="columnIndex === 1" @click="move(2)">Тестирование</button>
+                    <button class="but" v-if="columnIndex === 2" @click="returnToWork">Вернуть</button>
+                    <button class="but" v-if="columnIndex === 2" @click="move(3)">Завершить</button>
+                </div>
             </div>
-            <button v-if="canCreate" @click="createCard">Создать карточку</button>
-        </div>
-    `,
-    methods: {
-        createCard() {
-            const newCard = {
-                id: Date.now(),
-                title: 'Новая задача',
-                description: 'Описание задачи',
-                deadline: '2023-12-31',
-                createdAt: new Date().toLocaleString(),
-                lastEdited: new Date().toLocaleString()
-            };
-            this.$emit('move-card', newCard, '', 'planned');
-        },
-        moveCard(card, to) {
-            this.$emit('move-card', card, this.title.toLowerCase().replace(/ /g, ''), to);
-        },
-        editCard(card) {
-            this.$emit('edit-card', card, this.title.toLowerCase().replace(/ /g, ''));
-        },
-        deleteCard(cardId) {
-            this.$emit('delete-card', cardId);
-        }
-    }
-});
-
-Vue.component('card', {
-    props: ['card'],
-    template: `
-        <div class="card" :class="{ overdue: isOverdue, completed: isCompleted }">
-            <h3>{{ card.title }}</h3>
-            <p>{{ card.description }}</p>
-            <div class="deadline">Дэдлайн: {{ card.deadline }}</div>
-            <div class="timestamp">Создано: {{ card.createdAt }}</div>
-            <div class="timestamp">Последнее редактирование: {{ card.lastEdited }}</div>
-            <button @click="editCard">Редактировать</button>
-            <button @click="deleteCard">Удалить</button>
-            <button v-if="!isCompleted" @click="moveCard('inProgress')">В работу</button>
-            <button v-if="isInProgress" @click="moveCard('testing')">В тестирование</button>
-            <button v-if="isTesting" @click="moveCard('completed')">Завершить</button>
-            <button v-if="isTesting" @click="moveCard('inProgress', 'Возврат: требуется доработка')">Вернуть в работу</button>
-        </div>
-    `,
-    computed: {
-        isOverdue() {
-            return new Date(this.card.deadline) < new Date() && this.card.status === 'completed';
-        },
-        isCompleted() {
-            return this.card.status === 'completed';
-        },
-        isInProgress() {
-            return this.card.status === 'inProgress';
-        },
-        isTesting() {
-            return this.card.status === 'testing';
-        }
-    },
-    methods: {
-        editCard() {
-            const newTitle = prompt('Введите новый заголовок', this.card.title);
-            const newDescription = prompt('Введите новое описание', this.card.description);
-            const newDeadline = prompt('Введите новый дэдлайн', this.card.deadline);
-            if (newTitle && newDescription && newDeadline) {
-                this.card.title = newTitle;
-                this.card.description = newDescription;
-                this.card.deadline = newDeadline;
-                this.card.lastEdited = new Date().toLocaleString();
-                this.$emit('edit-card', this.card);
+        `,
+        methods: {
+            move(toColumn) {
+                this.$emit('move-card', {
+                    cardId: this.card.id,
+                    from: this.columnIndex,
+                    to: toColumn
+                });
+            },
+            returnToWork() {
+                const reason = prompt('Укажите причину возврата в работу:');
+                if (reason) {
+                    this.$emit('move-card', {
+                        cardId: this.card.id,
+                        from: this.columnIndex,
+                        to: 1,
+                        reason: reason
+                    });
+                }
             }
-        },
-        deleteCard() {
-            this.$emit('delete-card', this.card.id);
-        },
-        moveCard(to, reason) {
-            if (reason) {
-                this.card.returnReason = reason;
-            }
-            this.$emit('move-card', this.card, to);
         }
-    }
-});
+    });
 
-new Vue({
-    el: '#app',
-    data() {
-        
-    }
+    Vue.component('column', {
+        props: ['column', 'columnIndex'],
+        template: `
+            <div class="column">
+                <h2>{{ column.title }}</h2>
+                <card 
+                    v-for="card in column.cards" 
+                    :key="card.id" 
+                    :card="card" 
+                    :column-index="columnIndex"
+                    @edit-card="$emit('edit-card', card)"
+                    @delete-card="$emit('delete-card', card.id)"
+                    @move-card="$emit('move-card', $event)"
+                />
+            </div>
+        `
+    });
 
+    Vue.component('board', {
+        props: ['columns'],
+        template: `
+            <div class="board">
+                <column 
+                    v-for="(column, index) in columns" 
+                    :key="index" 
+                    :column="column" 
+                    :column-index="index"
+                    @edit-card="$emit('edit-card', $event)"
+                    @delete-card="$emit('delete-card', $event)"
+                    @move-card="$emit('move-card', $event)"
+                />
+            </div>
+        `
+    });
+
+    new Vue({
+        el: '#app',
+        data: () => ({
+            columns: [
+                { title: 'Запланированные задачи', cards: [] },
+                { title: 'Задачи в работе', cards: [] },
+                { title: 'Тестирование', cards: [] },
+                { title: 'Выполненные задачи', cards: [] }
+            ],
+            formData: { title: '', description: '', deadline: '' },
+            editingCard: null
+        }),
+        methods: {
+            addCard() {
+                this.formData = { title: '', description: '', deadline: '' };
+                this.editingCard = null;
+            },
+            saveCard() {
+                if (!this.formData.title || !this.formData.deadline) return;
+
+                if (this.editingCard) {
+                    Object.assign(this.editingCard, this.formData);
+                    this.editingCard.changes.push({
+                        type: 'Редактирование',
+                        timestamp: new Date().toLocaleString()
+                    });
+                } else {
+                    this.columns[0].cards.push({
+                        id: Date.now(),
+                        ...this.formData,
+                        createdAt: new Date().toLocaleString(),
+                        lastEdited: null,
+                        isOverdue: false,
+                        isCompleted: false,
+                        returnReason: null,
+                        changes: [],
+                    });
+                }
+                this.formData = { title: '', description: '', deadline: '' };
+            },
+            editCard(card) {
+                this.formData = { ...card };
+                this.editingCard = card;
+            },
+            deleteCard(cardId) {
+                this.columns.forEach(col => col.cards = col.cards.filter(c => c.id !== cardId));
+            },
+            moveCard({ cardId, from, to, reason }) {
+                const card = this.findCard(cardId);
+                if (!card) return;
+
+                this.columns[from].cards = this.columns[from].cards.filter(c => c.id !== cardId);
+
+                if (to === 3) {
+                    const deadline = new Date(card.deadline);
+                    card.isOverdue = new Date() > deadline;
+                    card.isCompleted = !card.isOverdue;
+                    card.returnReason = null;
+                }
+
+                if (reason) {
+                    card.returnReason = reason;
+                }
+
+                card.changes.push({
+                    type: 'Перемещение',
+                    timestamp: new Date().toLocaleString()
+                });
+
+                this.columns[to].cards.push(card);
+            },
+            findCard(cardId) {
+                for (const col of this.columns) {
+                    const card = col.cards.find(c => c.id === cardId);
+                    if (card) return card;
+                }
+                return null;
+            }
+        }
+    });
 });

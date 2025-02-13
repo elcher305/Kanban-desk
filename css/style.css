@@ -1,63 +1,119 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
 #app {
-    padding: 20px;
-}
-
-.kanban-board {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
 }
 
-.column {
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 22%;
+body{
+    background-color: rgb(255, 255, 255);
 }
 
-.column h2 {
-    text-align: center;
-    margin-bottom: 10px;
+.column {
+    margin-top: 20px;
+    padding: 25px;
+    width: 250px;
+    background-color: rgba(253,190,207, .5);
+    border-radius: 10px;
+
 }
 
 .card {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    background-color: white;
+    border-radius: 15px;
     padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
+    margin-top: 10px;
 }
 
-.card h3 {
-    margin: 0 0 5px 0;
+.title {
+    font-family: sans-serif;
+    font-size: 18px;
+
 }
 
-.card p {
-    margin: 0 0 10px 0;
+.anti-dots {
+    list-style-type: none;
 }
 
-.card .deadline {
-    font-size: 0.9em;
-    color: #666;
+input {
+    font-family: sans-serif;
+    font-size: 16px;
 }
 
-.card .timestamp {
-    font-size: 0.8em;
-    color: #999;
+h2 {
+    font-family: sans-serif;
+    text-align: center;
 }
 
-.card.overdue {
-    border-left: 5px solid red;
+h3 {
+    font-family: sans-serif;
+    text-align: center;
 }
 
-.card.completed {
-    border-left: 5px solid green;
+
+ul {
+    padding: 0;
+}
+
+.but {
+    background-color: rgb(223,186,230);
+    margin-top: 20px;
+    padding: 10px;
+    font-family: sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+}
+
+p{
+    font-family: sans-serif;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form {
+    height: 30px;
+    width: 230px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 15px;
+    padding: 10px;
+
+}
+
+.data {
+    height: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 15px;
+    padding: 10px;
+
+}
+
+.board {
+    display: flex;
+    gap: 20px;
+}
+
+.overdue {
+    color: red;
+}
+
+.completed {
+    color: green;
+}
+
+.add-card-form {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: rgba(253,190,207, .5);
+    border-radius: 8px;
+}
+
+li {
+    font-family: sans-serif;
+    font-size: 16px;
+    list-style-type: none;
 }
