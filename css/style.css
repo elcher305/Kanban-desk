@@ -9,18 +9,18 @@ body{
 }
 
 .column {
-    margin-top: 20px;
-    padding: 25px;
-    width: 250px;
-    background-color: rgba(253,190,207, .5);
-    border-radius: 10px;
+    margin-top: 10px;
+    width: 350px;
+    background-color: rgba(90, 253, 119, 0.5);
+    border-radius: 7px;
 
 }
 
 .card {
+    width: 250px;
+    height: 210px;
     background-color: white;
-    border-radius: 15px;
-    padding: 10px;
+    padding: 15px;
     margin-top: 10px;
 }
 
@@ -54,14 +54,66 @@ ul {
     padding: 0;
 }
 
+.but-work {
+    background-color: rgb(0, 128, 255);
+    width: 80px;
+    height: 30px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 13px;
+    border-radius: 5px;
+    border: none;
+}
+
+.but-work:hover {
+    background-color: rgb(0, 116, 230);
+}
+
+.but-edit {
+    background-color: rgb(255, 136, 0);
+    width: 120px;
+    height: 30px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 13px;
+    border-radius: 5px;
+    border: none;
+}
+
+.but-edit:hover {
+    background-color: rgb(244, 108, 2);
+}
+
+.but-del {
+    background-color: rgb(255, 0, 0);
+    width: 80px;
+    height: 30px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 13px;
+    border-radius: 5px;
+    border: none;
+}
+
+.but-del:hover {
+    background-color: rgb(234, 0, 0);
+}
+
 .but {
-    background-color: rgb(223,186,230);
-    margin-top: 20px;
-    padding: 10px;
+    background-color: rgb(0, 126, 255);
+    color: white;
+    width: 100px;
+    height: 30px;
+    margin-top: 10px;
+    padding: 6px;
     font-family: sans-serif;
     font-size: 14px;
     border-radius: 5px;
     border: none;
+}
+
+.but:hover {
+    background-color: rgb(6, 80, 149);
 }
 
 p{
@@ -74,9 +126,9 @@ form {
 }
 
 .form {
-    height: 30px;
+    height: 15px;
     width: 230px;
-    border: 1px solid gray;
+    border: none;
     border-radius: 5px;
     margin-top: 15px;
     padding: 10px;
@@ -84,17 +136,19 @@ form {
 }
 
 .data {
-    height: 10px;
-    border: 1px solid gray;
+    height: 15px;
+    border: none;
+    font-size: 14px;
+    color: gray;
     border-radius: 5px;
-    margin-top: 15px;
+    margin-top: 20px;
     padding: 10px;
 
 }
 
 .board {
     display: flex;
-    gap: 20px;
+    gap: 30px;
 }
 
 .overdue {
@@ -106,6 +160,7 @@ form {
 }
 
 .add-card-form {
+    width: 300px;
     margin-top: 20px;
     padding: 20px;
     background-color: rgba(253,190,207, .5);

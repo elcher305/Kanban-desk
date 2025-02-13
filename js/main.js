@@ -19,12 +19,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p v-if="card.isOverdue" class="overdue">Просрочено</p>
                 <p v-if="card.isCompleted" class="completed">Выполнено в срок</p>
                 <div>
-                    <button v-if="columnIndex !== 3" class="but" @click="$emit('edit-card')">Редактировать</button>
-                    <button class="but" @click="$emit('delete-card')">Удалить</button>
-                    <button class="but" v-if="columnIndex === 0" @click="move(1)">В работу</button>
-                    <button class="but" v-if="columnIndex === 1" @click="move(2)">Тестирование</button>
-                    <button class="but" v-if="columnIndex === 2" @click="returnToWork">Вернуть</button>
-                    <button class="but" v-if="columnIndex === 2" @click="move(3)">Завершить</button>
+                    <button v-if="columnIndex !== 3" class="but-edit" @click="$emit('edit-card')">Редактировать</button>
+                    <button class="but-del" @click="$emit('delete-card')">Удалить</button>
+                    <button class="but-work" v-if="columnIndex === 0" @click="move(1)">В работу</button>
+                    <button class="but-test" v-if="columnIndex === 1" @click="move(2)">Тестирование</button>
+                    <button class="but-return" v-if="columnIndex === 2" @click="returnToWork">Вернуть</button>
+                    <button class="but-comp" v-if="columnIndex === 2" @click="move(3)">Завершить</button>
                 </div>
             </div>
         `,
